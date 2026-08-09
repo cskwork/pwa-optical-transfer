@@ -35,6 +35,8 @@ import { requestScreenWakeLock } from "../shared/wake-lock";
 import { applyAdvancedConstraint, probeCameraCapabilities } from "../shared/platform";
 import { closeOnBackdropClick } from "../shared/dialog";
 import { t, initI18n, bootI18n, applyTranslations } from "../shared/i18n";
+import { bootTheme } from "../shared/theme";
+import { showBeginnerBanner } from "../shared/beginner";
 
 const startBtn = document.getElementById("start") as HTMLButtonElement;
 const video = document.getElementById("video") as HTMLVideoElement;
@@ -94,6 +96,8 @@ document.querySelector('.mode-nav a[href="../receive/"]')?.setAttribute("aria-cu
 // the system still needs initialising before any t() call runs.
 initI18n({});
 bootI18n();
+bootTheme();
+showBeginnerBanner("beginner.recv");
 
 // Live diagnostics get re-labelled when the transfer finishes (Live → Summary);
 // a language switch mid-transfer should keep that label current too.

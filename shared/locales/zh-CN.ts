@@ -149,5 +149,20 @@ export const zhCN: Record<string, string> = {
   "footer.releases": "发布",
   "footer.links": "项目链接",
   "send.specGzipLabel": "gzip",
-  "send.specNone": "无"
+  "send.specNone": "无",
+  "home.tipSend": "从此屏幕发送文件或文本",
+  "home.tipReceive": "用摄像头扫描另一屏幕上的二维码来接收",
+  "home.tipShare": "将此应用分享到其他设备",
+  "send.tipMode": "选择发送内容：文件或文本",
+  "send.tipFilePicker": "点击选择要发送的文件",
+  "send.tipSnippet": "在此输入或粘贴要发送的文本",
+  "send.tipSettings": "调整传输速度和数据密度。如果不工作请调低。",
+  "send.tipStage": "用另一台设备的摄像头扫描此二维码。点击可放大。",
+  "recv.tipStart": "打开摄像头并对准发送屏幕上的二维码",
+  "recv.tipDiag": "实时查看传输速度和解码状态",
+  "recv.tipSettings": "调整摄像头分辨率和解码性能",
+  "beginner.home": "<strong>欢迎！</strong>在两台设备上打开此应用。一台按<strong>发送</strong>，另一台按<strong>接收</strong>。文件通过光传输 — 无需互联网。",
+  "beginner.send": "<strong>使用方法：</strong>选择文件或输入文本，然后在另一台设备上打开<strong>接收</strong>页面，将摄像头对准此屏幕上的二维码。调高亮度效果更好。",
+  "beginner.recv": "<strong>使用方法：</strong>按启动摄像头，然后对准发送屏幕上显示的二维码。文件将自动接收。",
+  "beginner.close": "关闭"
 };

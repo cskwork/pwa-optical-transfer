@@ -134,6 +134,10 @@ export function applyTranslations(scope: ParentNode = ROOT()): void {
   scope.querySelectorAll<HTMLElement>("[data-i18n-content]").forEach((el) => {
     el.setAttribute("content", t(el.dataset.i18nContent!));
   });
+  // Tooltips.
+  scope.querySelectorAll<HTMLElement>("[data-i18n-tip]").forEach((el) => {
+    el.setAttribute("data-tip", t(el.dataset.i18nTip!));
+  });
   // document.title lives outside [data-i18n]; handle the opt-in page title.
   const titleEl = document.documentElement.querySelector<HTMLTitleElement>("title[data-i18n-title]");
   if (titleEl) document.title = t(titleEl.dataset.i18nTitle!);

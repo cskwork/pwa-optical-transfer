@@ -128,8 +128,8 @@ export default defineConfig(({ mode }) => {
           short_name: "데시멘",
           description:
             "화면과 카메라만으로 두 기기 사이에 파일이나 텍스트를 전송합니다. 네트워크 불필요.",
-          theme_color: "#070a11",
-          background_color: "#070a11",
+          theme_color: "#f7f9fc",
+          background_color: "#f7f9fc",
           display: "standalone",
           start_url: "./",
           // Real icons, not the demo payload image this once pointed at. The

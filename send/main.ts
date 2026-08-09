@@ -39,6 +39,8 @@ import { statusLine } from "../shared/status-line";
 import { requestScreenWakeLock } from "../shared/wake-lock";
 import { wireShareDialog } from "../shared/share-dialog";
 import { t, initI18n, bootI18n } from "../shared/i18n";
+import { bootTheme } from "../shared/theme";
+import { showBeginnerBanner } from "../shared/beginner";
 
 const MARGIN = 4; // quiet-zone modules
 const LOOKAHEAD = 3;
@@ -296,6 +298,8 @@ async function main() {
   }
   initI18n({ maxFile: MAX_FILE_LABEL, maxSnippet: MAX_SNIPPET_LABEL });
   bootI18n();
+  bootTheme();
+  showBeginnerBanner("beginner.send");
   applyMode();
   window.addEventListener("resize", () => resizeDisplay?.());
   for (const el of [cfgFps, cfgBytes, cfgEcc, cfgSize]) {

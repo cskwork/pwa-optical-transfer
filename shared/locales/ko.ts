@@ -149,5 +149,20 @@ export const ko: Record<string, string> = {
   "footer.releases": "릴리스",
   "footer.links": "프로젝트 링크",
   "send.specGzipLabel": "gzip",
-  "send.specNone": "없음"
+  "send.specNone": "없음",
+  "home.tipSend": "이 화면에서 파일이나 텍스트를 전송합니다",
+  "home.tipReceive": "다른 화면의 QR 코드를 카메라로 스캔하여 받습니다",
+  "home.tipShare": "이 앱을 다른 기기에 공유합니다",
+  "send.tipMode": "파일 또는 텍스트 중 전송할 종류를 선택하세요",
+  "send.tipFilePicker": "클릭하여 전송할 파일을 선택하세요",
+  "send.tipSnippet": "전송할 텍스트를 여기에 입력하거나 붙여넣으세요",
+  "send.tipSettings": "전송 속도와 데이터 밀도를 조정합니다. 잘 안 되면 낮추세요.",
+  "send.tipStage": "이 코드를 다른 기기의 카메라로 스캔하세요. 크게 보려면 클릭하세요.",
+  "recv.tipStart": "카메라를 켜고 전송 화면의 QR 코드를 비추세요",
+  "recv.tipDiag": "전송 속도와 디코딩 상태를 실시간으로 확인합니다",
+  "recv.tipSettings": "카메라 해상도와 디코딩 성능을 조정합니다",
+  "beginner.home": "<strong>처음 오신 것을 환영합니다!</strong> 두 기기에서 이 앱을 열고, 한쪽에서 <strong>전송</strong>을, 다른 쪽에서 <strong>수신</strong>을 누르세요. 파일이 빛으로 전송됩니다 — 인터넷이 필요 없습니다.",
+  "beginner.send": "<strong>사용법:</strong> 파일을 선택하거나 텍스트를 입력한 후, 다른 기기에서 <strong>수신</strong> 화면을 열고 이 화면의 QR 코드를 카메라로 비추세요. 화면 밝기를 최대로 높이면 더 잘됩니다.",
+  "beginner.recv": "<strong>사용법:</strong> 카메라 시작을 누르고, 다른 기기의 전송 화면에 표시된 QR 코드를 비추세요. 파일이 자동으로 수신됩니다.",
+  "beginner.close": "닫기"
 };

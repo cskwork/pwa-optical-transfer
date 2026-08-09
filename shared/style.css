@@ -132,7 +132,7 @@ button:focus-visible {
 
 .file-picker.has-file:hover .file-picker-button {
   /* --red at ~12% for the fill; keep in step if the token changes. */
-  background: rgba(255, 123, 114, 0.12);
+  background: rgba(var(--red-rgb), 0.12);
 }
 
 .file-picker-text {
@@ -411,7 +411,43 @@ details.settings input[type="range"] {
    free to mean *verified* and red free to mean *failed*, which this UI needs.
    Every colour below is a token; the only literal colours left in this file are
    functional (the QR quiet zone, the letterbox behind the camera). */
+/* Product shell ------------------------------------------------------------
+   "Aperture" — two surfaces of the same identity. The light theme is the
+   default for a professional business context; dark is an explicit opt-in.
+   Every colour is a token; the only literal colours left in this file are
+   functional (the QR quiet zone, the letterbox behind the camera, and the
+   camera HUD overlay which sits over a always-dark video feed). */
+
+/* Light theme — default */
 :root {
+  color-scheme: light;
+  --bg: #f7f9fc;
+  --panel: #ffffff;
+  --panel-strong: #f0f4fa;
+  --line: #dde5ef;
+  --line-bright: #c0cee0;
+  --text: #1a2332;
+  --text-dim: #3d4d65;
+  --muted: #6b7a94;
+  --muted-dim: #94a0b8;
+  --accent: #1066d6;
+  --accent-hi: #0d55b0;
+  --accent-ink: #ffffff;
+  --green: #1ba87a;
+  --red: #dc3545;
+  --viewport-bg: #0a0e16;
+  --accent-rgb: 16, 102, 214;
+  --bg-rgb: 247, 249, 252;
+  --hud-border: rgba(255, 255, 255, 0.16);
+  --red-rgb: 220, 53, 69;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+  --font-mono: "SF Mono", ui-monospace, SFMono-Regular, "Apple SD Gothic Neo",
+    "Noto Sans KR", Menlo, Consolas, monospace;
+}
+
+/* Dark theme — explicit opt-in via [data-theme="dark"] */
+:root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #070a11;
   --panel: #0e1420;
@@ -424,20 +460,16 @@ details.settings input[type="range"] {
   --muted-dim: #5c6883;
   --accent: #58c8ff;
   --accent-hi: #8adaff;
-  /* Ink for text sitting ON the accent. Separate token because a light theme
-     would need this to go the other way. */
   --accent-ink: #04121c;
   --green: #5fe0b0;
   --red: #ff7b72;
-  /* Behind the camera image: stays near-black in any theme. */
   --viewport-bg: #04070d;
   --accent-rgb: 88, 200, 255;
   --bg-rgb: 7, 10, 17;
-  /* Monospace stack reserved for pure-data readouts (metrics, spec values,
-     status codes) — keeps the measurement-equipment identity where data lives,
-     while Korean prose uses the proportional body stack above. */
-  --font-mono: "SF Mono", ui-monospace, SFMono-Regular, "Apple SD Gothic Neo",
-    "Noto Sans KR", Menlo, Consolas, monospace;
+  --hud-border: rgba(255, 255, 255, 0.16);
+  --red-rgb: 255, 123, 114;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* Column flex (gap zeroed — the base body gap would pad between header, main
@@ -472,8 +504,9 @@ details.settings input[type="range"] {
   gap: 16px;
   padding: max(14px, env(safe-area-inset-top)) max(22px, env(safe-area-inset-right)) 14px max(22px, env(safe-area-inset-left));
   border-bottom: 1px solid var(--line);
-  background: rgba(var(--bg-rgb), 0.9);
+  background: rgba(var(--bg-rgb), 0.92);
   backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
   position: relative;
   z-index: 3;
 }
@@ -605,6 +638,7 @@ details.settings input[type="range"] {
   border: 1px solid var(--line);
   border-radius: 14px;
   background: linear-gradient(150deg, var(--panel-strong), var(--panel));
+  box-shadow: var(--shadow);
 }
 
 .note-feature-card {
@@ -811,7 +845,7 @@ details.settings input[type="range"] {
 .status-line.error {
   padding: 10px 12px;
   color: var(--red);
-  background: rgba(255, 123, 114, 0.1);
+  background: rgba(var(--red-rgb), 0.1);
   border-left: 3px solid var(--red);
   border-radius: 0 8px 8px 0;
   font-weight: 700;
@@ -1067,7 +1101,7 @@ details.settings input[type="range"] {
 .transfer-hud .progress {
   height: 12px;
   background: rgba(var(--bg-rgb), 0.86);
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: var(--hud-border);
 }
 
 .diagnostics {
@@ -1142,13 +1176,14 @@ details.settings input[type="range"] {
   background: var(--panel);
   border: 1px solid var(--line-bright);
   border-radius: 12px;
+  box-shadow: var(--shadow-lg);
   padding: 18px 20px;
   font-size: 13px;
   line-height: 1.6;
 }
 
 .help-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.45);
 }
 
 .help-dialog h2 {
@@ -1452,5 +1487,255 @@ details.settings input[type="range"] {
     min-width: 26px;
     padding: 3px 6px;
     font-size: 10px;
+  }
+}
+
+
+/* Theme toggle -------------------------------------------------------------
+   A compact icon button matching the language switcher's pill form. */
+.theme-toggle {
+  width: auto;
+  min-width: 30px;
+  height: 30px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.theme-toggle svg {
+  width: 16px;
+  height: 16px;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  color: var(--accent);
+  border-color: var(--line-bright);
+  outline: none;
+}
+
+.theme-toggle:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+/* Tooltips / feature guides -----------------------------------------------
+   Zero-JS tooltips via [data-tip] + ::after/::before. Position defaults to
+   top; [data-tip-pos="bottom"] flips it. The tooltip shows on hover and on
+   focus-visible, so keyboard users get it too. */
+[data-tip] {
+  position: relative;
+}
+
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  width: max-content;
+  max-width: 240px;
+  padding: 7px 11px;
+  color: var(--text);
+  background: var(--panel-strong);
+  border: 1px solid var(--line-bright);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.45;
+  white-space: normal;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+[data-tip]::before {
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 3px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  border: 5px solid transparent;
+  border-top-color: var(--line-bright);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+[data-tip]:hover::after,
+[data-tip]:focus-visible::after,
+[data-tip]:hover::before,
+[data-tip]:focus-visible::before {
+  opacity: 1;
+}
+
+[data-tip-pos="bottom"]::after {
+  bottom: auto;
+  top: calc(100% + 8px);
+}
+
+[data-tip-pos="bottom"]::before {
+  bottom: auto;
+  top: calc(100% + 3px);
+  border-top-color: transparent;
+  border-bottom-color: var(--line-bright);
+}
+
+/* On touch devices hover doesn't fire, so show the tip on :active too.
+   This is the best no-JS fallback for mobile. */
+@media (hover: none) {
+  [data-tip]::after,
+  [data-tip]::before {
+    display: none;
+  }
+}
+
+/* Beginner help banner -----------------------------------------------------
+   A dismissible first-visit banner that explains what this app does in one
+   line. Hidden after the user dismisses it (localStorage). */
+.beginner-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  max-width: 720px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  background: rgba(var(--accent-rgb), 0.07);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.beginner-banner p {
+  margin: 0;
+  flex: 1;
+}
+
+.beginner-banner strong {
+  color: var(--accent);
+}
+
+.beginner-banner-close {
+  flex: none;
+  width: auto;
+  min-width: 0;
+  padding: 2px 8px;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.beginner-banner-close:hover {
+  color: var(--text);
+}
+
+.beginner-banner[hidden] {
+  display: none !important;
+}
+
+
+/* Tablet & touch optimization ------------------------------------------------
+   Touch targets must meet 44px minimum. Header controls (lang switcher, theme
+   toggle, mode nav) are fine on desktop but too small for fingers on phones.
+   Tablets (681–1024px) get a slightly wider main column. */
+@media (max-width: 1024px) {
+  .home-shell {
+    width: min(100% - 32px, 880px);
+  }
+  .hero h1 {
+    font-size: clamp(24px, 3.5vw, 34px);
+  }
+  .hero-copy {
+    font-size: clamp(13px, 1.4vw, 15px);
+  }
+  .transfer-card {
+    padding: 20px;
+  }
+  .transfer-card h2 {
+    font-size: clamp(17px, 2.2vw, 22px);
+  }
+}
+
+@media (max-width: 680px) {
+  /* Enlarge all header controls to meet 44px touch target minimum. */
+  .lang-seg {
+    min-width: 36px;
+    min-height: 32px;
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  .lang-switcher {
+    padding: 4px;
+  }
+  .theme-toggle {
+    width: 36px;
+    height: 36px;
+  }
+  .theme-toggle svg {
+    width: 18px;
+    height: 18px;
+  }
+  .mode-nav a {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+  .header-right {
+    gap: 8px;
+  }
+  /* Settings summary needs a bigger hit area too. */
+  details.settings summary {
+    padding: 8px 0;
+    font-size: 12px;
+  }
+  /* The settings labels inside are small — give them more breathing room. */
+  details.settings label {
+    gap: 4px;
+  }
+  details.settings select,
+  details.settings input[type="range"] {
+    min-height: 40px;
+  }
+}
+
+/* Landscape phone: receiver camera should use most of the short dimension. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .site-header {
+    min-height: auto;
+    padding: 6px 14px;
+  }
+  .receiver-shell {
+    padding-top: 4px;
+  }
+  .receiver-heading h1 {
+    font-size: 18px;
+  }
+  .receiver-heading .eyebrow {
+    display: none;
+  }
+  .preview {
+    height: calc(100dvh - 90px);
+    max-height: calc(100dvh - 90px);
+  }
+  .receiver-primary > button {
+    min-height: 44px;
+    min-width: min(100%, 200px);
   }
 }

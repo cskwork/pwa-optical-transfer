@@ -149,5 +149,20 @@ export const en: Record<string, string> = {
   "footer.releases": "Releases",
   "footer.links": "Project links",
   "send.specGzipLabel": "gzip",
-  "send.specNone": "none"
+  "send.specNone": "none",
+  "home.tipSend": "Send a file or text from this screen",
+  "home.tipReceive": "Scan the QR code on another screen with your camera",
+  "home.tipShare": "Share this app with another device",
+  "send.tipMode": "Choose what to send: a file or text",
+  "send.tipFilePicker": "Click to select a file to send",
+  "send.tipSnippet": "Type or paste the text you want to send here",
+  "send.tipSettings": "Adjust transfer speed and data density. Lower them if it's not working.",
+  "send.tipStage": "Scan this code with the other device's camera. Click to enlarge.",
+  "recv.tipStart": "Turn on the camera and point it at the sender's QR code",
+  "recv.tipDiag": "View transfer speed and decoding status in real time",
+  "recv.tipSettings": "Adjust camera resolution and decoding performance",
+  "beginner.home": "<strong>Welcome!</strong> Open this app on both devices. Press <strong>Send</strong> on one and <strong>Receive</strong> on the other. Files transfer via light — no internet needed.",
+  "beginner.send": "<strong>How to use:</strong> Select a file or enter text, then open the <strong>Receive</strong> screen on the other device and point its camera at the QR code on this screen. Turn up brightness for best results.",
+  "beginner.recv": "<strong>How to use:</strong> Press Start camera, then point it at the QR code displayed on the sender's screen. The file will be received automatically.",
+  "beginner.close": "Close"
 };

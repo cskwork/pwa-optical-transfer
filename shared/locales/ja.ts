@@ -149,5 +149,20 @@ export const ja: Record<string, string> = {
   "footer.releases": "リリース",
   "footer.links": "プロジェクトリンク",
   "send.specGzipLabel": "gzip",
-  "send.specNone": "なし"
+  "send.specNone": "なし",
+  "home.tipSend": "この画面からファイルやテキストを送信します",
+  "home.tipReceive": "カメラで別の画面のQRコードをスキャンして受信します",
+  "home.tipShare": "このアプリを別の端末に共有します",
+  "send.tipMode": "送信するものを選択：ファイルまたはテキスト",
+  "send.tipFilePicker": "クリックして送信するファイルを選択",
+  "send.tipSnippet": "送信するテキストをここに入力または貼り付け",
+  "send.tipSettings": "転送速度とデータ密度を調整します。うまくいかない場合は下げてください。",
+  "send.tipStage": "このコードを別の端末のカメラでスキャンしてください。クリックで拡大。",
+  "recv.tipStart": "カメラをオンにして送信画面のQRコードに向けてください",
+  "recv.tipDiag": "転送速度とデコード状態をリアルタイムで確認",
+  "recv.tipSettings": "カメラの解像度とデコード性能を調整",
+  "beginner.home": "<strong>ようこそ！</strong>両方の端末でこのアプリを開き、片方で<strong>送信</strong>、もう片方で<strong>受信</strong>を押してください。ファイルは光で転送されます — インターネット不要です。",
+  "beginner.send": "<strong>使い方：</strong>ファイルを選択またはテキストを入力し、もう一方の端末で<strong>受信</strong>画面を開いて、この画面のQRコードをカメラに向けてください。明るさを最大にすると効果的です。",
+  "beginner.recv": "<strong>使い方：</strong>カメラ開始を押し、送信画面に表示されたQRコードに向けてください。ファイルが自動的に受信されます。",
+  "beginner.close": "閉じる"
 };

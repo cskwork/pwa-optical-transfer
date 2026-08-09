@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title data-i18n-title="meta.sendTitle">데시멘 광학 전송 — 전송</title>
-    <meta name="theme-color" content="#070a11" />
+    <meta name="theme-color" content="#f7f9fc" />
+    <script>(function(){try{var t=localStorage.getItem("decimen-theme");if(!t){t=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}document.documentElement.setAttribute("data-theme",t);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",t==="dark"?"#070a11":"#f7f9fc");}catch(e){document.documentElement.setAttribute("data-theme","light");}})();</script>
     <link rel="icon" href="../decimen_logo.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
     <link rel="stylesheet" href="../shared/style.css" />
@@ -13,6 +14,7 @@
     <header class="site-header">
       <a class="brand" href="../"><svg class="brand-logo" viewBox="0 0 543 554.1" fill="currentColor" aria-hidden="true"><g transform="translate(-241,789) scale(0.1,-0.1)"><path d="M2410 6513 l0 -1378 103 101 c540 531 1324 986 1984 1153 402 102 850 95 1268 -21 529 -146 1300 -581 1860 -1050 175 -146 212 -184 199 -205 -37 -63 -502 -432 -754 -600 -969 -644 -1785 -844 -2590 -634 -667 174 -1376 581 -1947 1118 l-123 115 0 -1382 0 -1381 1478 4 c1291 3 1491 5 1588 20 1345 194 2240 1124 2355 2446 17 195 7 620 -19 786 -192 1236 -1030 2069 -2262 2249 -217 32 -411 36 -1772 36 l-1368 0 0 -1377z"/><path d="M4945 5906 c-300 -68 -532 -287 -611 -577 -25 -89 -25 -289 0 -378 141 -513 724 -749 1179 -477 405 242 503 778 209 1148 -100 125 -258 229 -417 273 -82 22 -282 29 -360 11z"/></g></svg><span data-i18n="meta.appName">데시멘 광학 전송</span></a>
       <div class="header-right">
+        <button data-theme-toggle class="theme-toggle" type="button" aria-label="Toggle dark mode"></button>
         <div data-lang-switcher></div>
         <nav class="mode-nav" aria-label="모드" data-i18n-aria="nav.mode"><a href="../send/" data-i18n="nav.send">전송</a><a href="../receive/" data-i18n="nav.receive">수신</a></nav>
       </div>
@@ -24,7 +26,7 @@
         <p data-i18n="send.intro">수신 화면으로 스캔하기 전까지는 어떤 데이터도 기기를 떠나지 않습니다.</p>
       </section>
 
-      <div class="mode-picker" id="mode-picker" role="radiogroup" aria-label="전송할 항목" data-i18n-aria="send.modeLabel">
+      <div class="mode-picker" id="mode-picker" role="radiogroup" aria-label="전송할 항목" data-i18n-aria="send.modeLabel" data-tip="파일 또는 텍스트 중 전송할 종류를 선택하세요" data-i18n-tip="send.tipMode">
         <label>
           <input type="radio" name="send-mode" value="file" checked />
           <span data-i18n="send.modeFile">파일</span>
@@ -35,7 +37,7 @@
         </label>
       </div>
 
-      <label class="file-picker" id="pane-file">
+      <label class="file-picker" id="pane-file" data-tip="클릭하여 전송할 파일을 선택하세요" data-i18n-tip="send.tipFilePicker" data-tip-pos="bottom">
         <span class="file-picker-button" id="file-picker-button" data-i18n="send.pickerBtn">파일 선택</span>
         <span class="file-picker-text" id="file-picker-label" data-i18n="send.pickerAny">모든 파일 · %MAX_FILE_LABEL% 이하</span>
         <input id="cfg-file" type="file" />
@@ -51,13 +53,13 @@
 
       <div class="note-composer" id="pane-snippet" hidden>
         <label for="snippet-text" id="snippet-label" data-i18n="send.snippetLabelShort">전송할 텍스트</label>
-        <textarea id="snippet-text" rows="7" data-i18n-placeholder="send.snippetPlaceholder" placeholder="무엇이든 붙여 넣거나 입력하세요 — URL, 설정, 긴 텍스트…"></textarea>
+        <textarea id="snippet-text" rows="7" data-tip="전송할 텍스트를 여기에 입력하거나 붙여넣으세요" data-i18n-tip="send.tipSnippet" data-tip-pos="bottom" data-i18n-placeholder="send.snippetPlaceholder" placeholder="무엇이든 붙여 넣거나 입력하세요 — URL, 설정, 긴 텍스트…"></textarea>
         <button id="send-snippet" type="button" data-i18n="send.startText">텍스트 스트림 시작</button>
       </div>
 
-      <div class="stage" id="stage" hidden><canvas id="qr" width="16" height="16"></canvas></div>
+      <div class="stage" id="stage" hidden data-tip="이 코드를 다른 기기의 카메라로 스캔하세요. 크게 보려면 클릭하세요." data-i18n-tip="send.tipStage"><canvas id="qr" width="16" height="16"></canvas></div>
       <details class="settings">
-        <summary data-i18n="send.settings">전송 설정</summary>
+        <summary data-i18n="send.settings" data-tip="전송 속도와 데이터 밀도를 조정합니다. 잘 안 되면 낮추세요." data-i18n-tip="send.tipSettings">전송 설정</summary>
         <div class="row">
           <label>
             <span data-i18n="send.cfgFps">전송 fps</span>
