@@ -16,5 +16,5 @@ resolution — screen-to-camera behavior varies enormously across hardware.
 
 ## Existing pull requests
 
-[#2](https://github.com/bashalarmistalt/decimen-optical-transfer/pull/2) was
+[#2](https://github.com/cskwork/pwa-optical-transfer/pull/2) was
 opened before this policy and is unaffected. This applies to new ones.

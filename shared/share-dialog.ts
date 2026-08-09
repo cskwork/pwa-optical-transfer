@@ -6,6 +6,7 @@
 
 import QRCode from "qrcode";
 import { closeOnBackdropClick } from "./dialog";
+import { t } from "./i18n";
 
 /** Wire the page's share dialog; returns the opener. */
 export function wireShareDialog(): () => void {
@@ -21,14 +22,14 @@ export function wireShareDialog(): () => void {
   copyBtn.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(urlInput.value);
-      copyBtn.textContent = "Copied";
+      copyBtn.textContent = t("share.copied");
     } catch {
       // Leave the text selected so a manual copy is one keystroke away.
       urlInput.select();
-      copyBtn.textContent = "Copy failed";
+      copyBtn.textContent = t("share.copyFailed");
     }
     setTimeout(() => {
-      copyBtn.textContent = "Copy";
+      copyBtn.textContent = t("share.copy");
     }, 1500);
   });
 

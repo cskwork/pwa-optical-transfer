@@ -34,6 +34,7 @@ import { statusLine } from "../shared/status-line";
 import { requestScreenWakeLock } from "../shared/wake-lock";
 import { applyAdvancedConstraint, probeCameraCapabilities } from "../shared/platform";
 import { closeOnBackdropClick } from "../shared/dialog";
+import { t, initI18n, bootI18n, applyTranslations } from "../shared/i18n";
 
 const startBtn = document.getElementById("start") as HTMLButtonElement;
 const video = document.getElementById("video") as HTMLVideoElement;
@@ -89,16 +90,31 @@ startBtn.onclick = () => void start();
 // a badge. Same story on the sender.
 document.querySelector('.mode-nav a[href="../receive/"]')?.setAttribute("aria-current", "page");
 
+// Korean-first i18n; params unused on the receiver (no size labels here) but
+// the system still needs initialising before any t() call runs.
+initI18n({});
+bootI18n();
+
+// Live diagnostics get re-labelled when the transfer finishes (Live → Summary);
+// a language switch mid-transfer should keep that label current too.
+window.addEventListener("langchange", () => {
+  applyTranslations();
+  if (diagnosticsEl && done) {
+    const label = diagnosticsEl.querySelector("summary");
+    if (label) label.textContent = t("recv.diagSummary");
+  }
+});
+
 const { setStatus, showError } = statusLine(stats);
 
 // The toast asks one question; the answers live in the dialog. The tip list is
 // built here rather than in the HTML so its numbers stay tied to the shared
 // send-settings constants the sender's controls are rendered from.
 for (const line of [
-  `On the sender, open Transfer settings and drop bytes / frame to ${NO_SIGNAL_HINT_FRAME_BYTES}.`,
-  `Still nothing? Drop the sender's tx fps to ${NO_SIGNAL_HINT_TX_FPS} as well.`,
-  "Fill this camera's view with the code, and prop the phone against something — autofocus hunting from hand tremor is the usual culprit.",
-  "Turn the sending screen's brightness all the way up.",
+  t("recv.tip1", { bytes: String(NO_SIGNAL_HINT_FRAME_BYTES) }),
+  t("recv.tip2", { fps: String(NO_SIGNAL_HINT_TX_FPS) }),
+  t("recv.tip3"),
+  t("recv.tip4"),
 ]) {
   const item = document.createElement("li");
   item.textContent = line;
@@ -139,7 +155,7 @@ function restartButton(label: string): HTMLButtonElement {
 function offerRetry(message: string) {
   startBtn.disabled = false;
   startBtn.style.display = "";
-  startBtn.textContent = "Start camera";
+  startBtn.textContent = t("recv.start");
   preview.style.display = "none";
   metricsEl.style.display = "none";
   if (diagnosticsEl) diagnosticsEl.style.display = "none";
@@ -150,10 +166,7 @@ async function start() {
   if (!navigator.mediaDevices?.getUserMedia) {
     // On insecure origins the API doesn't exist AT ALL — this is the plain-
     // http-over-LAN case. localhost is exempt; other hosts need https.
-    showError(
-      "camera needs a secure context — this page must be served over https to " +
-        "use the camera from another device. `npm run dev` already is.",
-    );
+    showError(t("recv.errSecure"));
     return;
   }
   const captureWidth = Number(cfgWidth.value);
@@ -161,7 +174,7 @@ async function start() {
   // Nothing on the page changes until the camera is actually running: the
   // error paths below all have to leave a usable Start button behind.
   startBtn.disabled = true;
-  startBtn.textContent = "Starting…";
+  startBtn.textContent = t("recv.starting");
   const base: MediaTrackConstraints = {
     facingMode: "environment",
     width: { ideal: captureWidth },
@@ -183,8 +196,8 @@ async function start() {
     const denied = err instanceof DOMException && err.name === "NotAllowedError";
     offerRetry(
       denied
-        ? "camera permission denied — allow it, then tap Start camera again."
-        : `camera: ${err instanceof Error ? err.message : String(err)}`,
+        ? t("recv.errDenied")
+        : t("recv.errCamera", { msg: err instanceof Error ? err.message : String(err) }),
     );
     return;
   }
@@ -198,7 +211,11 @@ async function start() {
   await video.play().catch(() => undefined);
   const settings = stream.getVideoTracks()[0]?.getSettings();
   setStatus(
-    `camera ${settings?.width}×${settings?.height}@${settings?.frameRate} — searching for a stream…`,
+    t("recv.cameraSearching", {
+      w: String(settings?.width ?? "?"),
+      h: String(settings?.height ?? "?"),
+      fps: String(settings?.frameRate ?? "?"),
+    }),
   );
 
   pool.resize(Number(cfgWorkers.value));
@@ -227,9 +244,14 @@ function reportCameraSettings() {
   const askedFps = Number(cfgCapFps.value);
   const gotFps = Math.round(s.frameRate ?? 0);
   const fpsNote = gotFps && gotFps !== askedFps ? ` (asked ${askedFps})` : "";
-  cameraActual.textContent =
-    `camera ${s.width}×${s.height} @ ${gotFps} fps${fpsNote} · ${pool.size} decode ` +
-    `worker${pool.size === 1 ? "" : "s"} · changes apply live`;
+  cameraActual.textContent = t("recv.cameraActual", {
+    w: String(s.width),
+    h: String(s.height),
+    fps: String(gotFps),
+    note: fpsNote,
+    workers: String(pool.size),
+    s: pool.size === 1 ? "" : "s",
+  });
 }
 
 /** Use what this camera can actually do, probed rather than UA-sniffed.
@@ -266,7 +288,7 @@ async function applyReceiveSettings() {
   } catch {
     // Some devices (notably iOS) refuse a live reconfigure. Keep the stream we
     // have rather than tearing down a transfer in progress.
-    cameraActual.textContent = "this camera refused a live change — restart to apply";
+    cameraActual.textContent = t("recv.cameraRefused");
     return;
   }
   reportCameraSettings();
@@ -349,16 +371,19 @@ function updateProgressEstimate() {
   const shownPercent = percent < 10 ? percent.toFixed(1) : percent.toFixed(0);
   bar.style.width = `${percent.toFixed(1)}%`;
   progressEl.setAttribute("aria-valuenow", String(Math.floor(percent)));
-  progressLabel.textContent =
-    `${shownPercent}% · ${decoder.solvedCount}/${decoder.k} blocks`;
+  progressLabel.textContent = t("recv.progressLabel", {
+    pct: shownPercent,
+    solved: String(decoder.solvedCount),
+    k: String(decoder.k),
+  });
   // Held back for the first few frames — a two-frame sample reads wildly wrong.
   const rate = decoder.framesNew >= 4 ? ` · ${goodputKbs(elapsed).toFixed(1)} KB/s` : "";
   etaLabel.textContent =
     (estimate.etaSeconds === undefined
       ? estimate.phase === "decoding"
-        ? `${decoder.framesNew} frames · decoding`
-        : "Estimating time…"
-      : `About ${formatDuration(estimate.etaSeconds)} · ${decoder.framesNew} frames`) + rate;
+        ? t("recv.etaDecoding", { frames: String(decoder.framesNew) })
+        : t("recv.etaEstimating")
+      : t("recv.etaAbout", { time: formatDuration(estimate.etaSeconds), frames: String(decoder.framesNew) })) + rate;
 }
 
 /** Payload KB/s, discounting the frames the fountain spends on overhead. That
@@ -391,47 +416,51 @@ async function finish(container: Uint8Array, hashOk: boolean, seconds: number) {
   // The metrics stay, frozen at their last tick — but "Live" is no longer
   // true, so the panel relabels itself as the record of the run it now is.
   const diagnosticsLabel = diagnosticsEl?.querySelector("summary");
-  if (diagnosticsLabel) diagnosticsLabel.textContent = "Transfer summary";
+  if (diagnosticsLabel) diagnosticsLabel.textContent = t("recv.diagSummary");
   bar.style.width = "100%";
   progressEl.setAttribute("aria-valuenow", "100");
-  etaLabel.textContent = `${formatDuration(seconds)} total`;
+  etaLabel.textContent = t("recv.etaTotal", { time: formatDuration(seconds) });
   try {
-    if (!hashOk) throw new Error("The optical stream checksum did not match.");
+    if (!hashOk) throw new Error(t("recv.errChecksum"));
     const file = await unpackFile(container);
-    if (!(await verifyFile(file))) throw new Error("The recovered file failed SHA-256 verification.");
+    if (!(await verifyFile(file))) throw new Error(t("recv.errSha"));
 
     // The container carries its own media type, so the receiver never has to be
     // told in advance whether a file or a text snippet is coming.
     const rate = (container.length / 1024 / seconds).toFixed(1);
     const gzipNote = file.compression === "gzip" ? "gzip decompressed · " : "";
     if (isSnippet(file)) {
-      progressLabel.textContent = "100% · text recovered";
+      progressLabel.textContent = t("recv.progressText");
       setStatus("");
       showSnippet(
         snippetText(file),
-        `text in ${seconds.toFixed(1)} s · ${rate} KB/s · ${gzipNote}SHA-256 verified ✓`,
+        t("recv.summarySnippet", { sec: seconds.toFixed(1), rate, gzip: gzipNote }),
       );
       return;
     }
 
-    progressLabel.textContent = "100% · file recovered";
+    progressLabel.textContent = t("recv.progressFile");
     const kb = Math.round(file.bytes.length / 1024);
     // The run's numbers belong under the heading, not up in the camera status
     // line — which is done for good and goes quiet.
     setStatus("");
     const summary = document.createElement("p");
     summary.className = "hint";
-    summary.textContent =
-      `${kb} KB in ${seconds.toFixed(1)} s · ${rate} KB/s · ${gzipNote}SHA-256 verified ✓`;
+    summary.textContent = t("recv.summary", {
+      kb: String(kb),
+      sec: seconds.toFixed(1),
+      rate,
+      gzip: gzipNote,
+    });
     const heading = document.createElement("div");
     heading.className = "done";
-    heading.textContent = "Transfer Complete!";
+    heading.textContent = t("recv.done");
     const url = URL.createObjectURL(new Blob([file.bytes as BlobPart], { type: file.type }));
     const download = document.createElement("a");
     download.className = "download";
     download.href = url;
     download.download = file.name;
-    download.textContent = `Save ${file.name}`;
+    download.textContent = t("recv.save", { name: file.name });
     // Reading order of the finished page: heading, the run's numbers, the
     // thing that arrived, Save under it, "Receive another file", and the
     // Transfer summary panel last in its natural spot after #result.
@@ -439,7 +468,7 @@ async function finish(container: Uint8Array, hashOk: boolean, seconds: number) {
     if (file.type.startsWith("image/")) {
       const image = document.createElement("img");
       image.className = "received";
-      image.alt = `Received file preview: ${file.name}`;
+      image.alt = t("recv.receivedImg", { name: file.name });
       image.src = url;
       result.append(image);
     } else if (file.type.startsWith("video/") || file.type.startsWith("audio/")) {
@@ -447,7 +476,7 @@ async function finish(container: Uint8Array, hashOk: boolean, seconds: number) {
       player.className = "received";
       player.controls = true;
       player.preload = "metadata";
-      player.setAttribute("aria-label", `Received file: ${file.name}`);
+      player.setAttribute("aria-label", t("recv.receivedMedia", { name: file.name }));
       // Inline, and never autoplay — the user taps play (which is also the
       // gesture that lets it start with sound).
       if (player instanceof HTMLVideoElement) player.playsInline = true;
@@ -466,7 +495,7 @@ async function finish(container: Uint8Array, hashOk: boolean, seconds: number) {
     actions.append(download);
     const endActions = document.createElement("div");
     endActions.className = "note-actions";
-    endActions.append(restartButton("Receive another file"));
+    endActions.append(restartButton(t("recv.another")));
     // The received bytes sit in the Cache API so the media player can range
     // over them (see servableMediaUrl) — which means they outlive the page.
     // Offer the scrub right where the transfer ends.
@@ -477,17 +506,15 @@ async function finish(container: Uint8Array, hashOk: boolean, seconds: number) {
     // live receiver is a reload. Offer it: a failed checksum used to leave the
     // page dead with nothing but an error string on it.
     bar.classList.add("error");
-    etaLabel.textContent = "Transfer failed";
+    etaLabel.textContent = t("recv.errHashFail");
     showError(error instanceof Error ? error.message : String(error));
     const heading = document.createElement("div");
     heading.className = "failed";
-    heading.textContent = "Transfer failed";
+    heading.textContent = t("recv.failed");
     const detail = document.createElement("p");
     detail.className = "received-note";
-    detail.textContent =
-      "Nothing usable came out of that stream. Restart the sender, then scan it again — " +
-      "a partial transfer costs nothing but the time.";
-    result.replaceChildren(heading, detail, restartButton("Try again"));
+    detail.textContent = t("recv.failedDetail");
+    result.replaceChildren(heading, detail, restartButton(t("recv.tryAgain")));
   }
 }
 
@@ -499,15 +526,15 @@ function clearCacheButton(): HTMLButtonElement {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "secondary-button";
-  button.textContent = "Clear Decimen cache";
+  button.textContent = t("recv.clearCache");
   button.addEventListener("click", () => {
     button.disabled = true;
     caches.delete("received-media").then(
       () => {
-        button.textContent = "Cache cleared";
+        button.textContent = t("recv.cacheCleared");
       },
       () => {
-        button.textContent = "Clear failed — try again";
+        button.textContent = t("recv.clearFailed");
         button.disabled = false;
       },
     );
@@ -568,7 +595,7 @@ function showNoSignalHint() {
 function showSnippet(text: string, summaryLine: string) {
   const heading = document.createElement("div");
   heading.className = "done";
-  heading.textContent = "Text received";
+  heading.textContent = t("recv.doneText");
 
   const summary = document.createElement("p");
   summary.className = "hint";
@@ -583,17 +610,17 @@ function showSnippet(text: string, summaryLine: string) {
   const copy = document.createElement("button");
   copy.type = "button";
   copy.className = "text-button";
-  copy.textContent = "Copy";
+  copy.textContent = t("recv.copy");
   copy.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(text);
-      copy.textContent = "Copied";
-      setTimeout(() => { copy.textContent = "Copy"; }, 1500);
+      copy.textContent = t("recv.copied");
+      setTimeout(() => { copy.textContent = t("recv.copy"); }, 1500);
     } catch {
-      copy.textContent = "Copy failed";
+      copy.textContent = t("recv.copyFailed");
     }
   });
-  actions.append(copy, restartButton("Receive another file"));
+  actions.append(copy, restartButton(t("recv.another")));
 
   result.replaceChildren(heading, summary, body, actions);
 }

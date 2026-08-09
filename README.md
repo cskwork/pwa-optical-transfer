@@ -1,89 +1,59 @@
-# Decimen Optical Transfer: fountain-coded QR file transfer
+# PWA Optical Transfer — 오프라인 광학 파일 전송
 
-Send a file between two devices using nothing but a **screen and a camera**.
-One page displays the file as an endless stream of animated QR codes; another
-device points its camera at it and reconstructs the file. **No network path
-between the devices, no app, no pairing, no permissions beyond the camera.**
-The payload travels as light.
+> 빛으로 파일을 전송하세요. 화면과 카메라만 있으면 됩니다.
 
-## Try it
+두 기기 사이에 **네트워크 없이** 파일이나 텍스트를 전송하는 PWA입니다.
+한 화면이 파일을 분산 코드(fountain code) 애니메이션 QR로 표시하고,
+다른 기기가 카메라로 스캔하여 파일을 복원합니다. **네트워크 경로, 계정,
+페어링이 필요 없습니다.**
 
-### **→ [decimen.app](https://decimen.app/)**
+## 특징
 
-Open it on both devices and go — nothing to install. Works offline after the
-first visit, and installs as an app on both iOS and Android if you want it on
-a home screen.
+- 🔒 **완전 오프라인** — 한 번 방문하면 서비스 워커로 캐싱되어 오프라인 작동
+- 📦 **포터블** — 단일 HTML 파일(`dist-standalone/`)로도 작동, USB나 어디서든 사용 가능
+- 🌐 **다국어 지원** — 한국어(기본), English, 日本語, 简体中文
+- 📱 **PWA 설치** — iOS/Android 홈 화면에 앱처럼 설치 가능
+- ⚡ **고속 전송** — 분산 코드로 최대 ~130 KB/s (기기 간)
+- ✅ **무결성 보장** — SHA-256 검증, gzip 압축, 원본 파일명/미디어 타입 보존
 
-Files up to 64 MB (or a pasted text snippet), filename and media type
-preserved, gzip only when it helps, SHA-256 verified before anything is
-offered — and received video plays right in the page. Extracted from a larger
-experiment that reached **128 KB/s phone-to-phone**.
+## 사용하기
 
-<p align="center">
-  <img src="docs/receiving.jpg" width="420"
-       alt="Phone receiving a file over light: 130.5 KB/s goodput, halfway through decoding the sender's animated QR stream" />
-</p>
-<p align="center"><em>Mid-transfer: a phone pulling a file out of the air at 130 KB/s.</em></p>
+### **→ [GitHub Pages에서 열기](https://cskwork.github.io/pwa-optical-transfer/)**
 
-Neither mode is encrypted: whatever is on the sending screen is readable by
-any camera pointed at it. The property this gives you is no network, not
-confidentiality — see [privacy](docs/user/privacy.md).
+두 기기에서 모두 열고 시작하면 됩니다. 설치 없이 사용 가능하며, 첫 방문 후 오프라인으로 작동합니다.
 
-## Documentation
+- **전송 화면**: `/send/`에서 파일이나 텍스트를 선택
+- **수신 화면**: `/receive/`에서 카메라를 켜고 전송 화면을 비춤
+- 최대 64 MB 파일 또는 4 MB 텍스트
 
-**Using it** — [quick start](docs/user/quick-start.md) ·
-[sending](docs/user/sending.md) · [receiving](docs/user/receiving.md) ·
-[troubleshooting](docs/user/troubleshooting.md) ·
-[install & offline](docs/user/install-and-offline.md) ·
-[privacy](docs/user/privacy.md)
+### 오프라인 독립 실행 파일
 
-**How it's built** — [architecture](docs/technical/architecture.md) ·
-[protocol](docs/technical/protocol.md) ·
-[platform quirks](docs/technical/platform-quirks.md) ·
-[build & release](docs/technical/build-and-release.md)
+`npm run build:standalone`로 생성되는 단일 HTML 파일은 네트워크 없이도 완전히 작동합니다:
 
-The short version of the protocol: a screen-to-camera link has no
-back-channel, so the sender streams fountain-coded frames ([Luby
-transform](https://en.wikipedia.org/wiki/Luby_transform_code)) — the receiver
-collects *any* ~K·1.15 distinct frames in any order and peels the file out.
-Dropped frames cost time, never correctness.
+- `decimen-sender.html` — 전송 전용 (USB, 이메일, 어디서든 배포)
+- `decimen-receiver.html` — 수신 전용
 
-## Run it yourself
+## 직접 빌드하기
 
 ```bash
 npm install
-npm run dev               # https dev server with HMR
-npm run serve             # build, then serve the production bundle
-npm run demo              # demo mode: only the bundled payloads can be sent
-npm test                  # golden wire-format vectors and unit tests
-npm run build             # the hosted site → dist/
-npm run build:standalone  # both self-contained pages → dist-standalone/
-npm run build:all         # everything
+npm run dev               # 개발 서버 (HTTPS, HMR)
+npm run build             # 프로덕션 빌드 → dist/
+npm run build:standalone  # 독립 실행 파일 → dist-standalone/
+npm run build:all         # 전체 빌드
+npm test                  # 단위 테스트 (74개)
 ```
 
-Open `https://localhost:5173/send/` on the sending device and the printed
-`Network` URL on the receiving phone (accept the self-signed certificate
-once). Walkthrough: [quick start](docs/user/quick-start.md).
+## 언어 전환
 
-## Similar projects
+모든 페이지 우측 상단의 언어 스위처(KO · EN · JA · 中)로 언어를 변경할 수 있습니다.
+선택은 `localStorage`에 저장되며, 브라우저 언어가 감지되지 않으면 한국어가 기본입니다.
 
-The concept here was arrived at independently. It turns out several people
-have had similar ideas, and their takes are all worth a look:
+## 기술
 
-- [mohankumarelec/airgapped-qr-code-transfer](https://github.com/mohankumarelec/airgapped-qr-code-transfer):
-  browser-based QR file transfer with compression and sequential chunking.
-  Discovered after publicly demoing this project; convergent evolution in
-  action.
-- [divan/txqr](https://github.com/divan/txqr) (2018): animated QR plus
-  fountain codes in Go, with two excellent write-ups on why fountain coding
-  beats sequential looping.
-- [sz3/libcimbar](https://github.com/sz3/libcimbar): goes past QR entirely
-  with a custom high-density color code purpose-built for this channel.
+분산 코드(Luby Transform)를 사용하여 **어떤 순서로든** 약 K×1.15개의 프레임을 수집하면
+파일을 복원할 수 있습니다. 드롭된 프레임은 시간 비용만 발생시키며, 정확성에는 영향이 없습니다.
 
-Built by [Evan Crawley (Bash Alarmist)](https://www.linkedin.com/in/evan-crawley), with
-[node-qrcode](https://github.com/soldair/node-qrcode) and
-[zxing-wasm](https://github.com/Sec-ant/zxing-wasm).
+## 라이선스
 
-## License
-
-MIT
+MIT — [원본 프로젝트](https://github.com/bashalarmistalt/decimen-optical-transfer) by Evan Crawley (Bash Alarmist).

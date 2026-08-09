@@ -26,7 +26,7 @@ import { licenseBanner } from "./build/license-banner";
 // — scrapers are inconsistent about resolving relative ones. Override with
 // VITE_SITE_URL when deploying somewhere else; nothing else depends on it, and
 // the build still works under any subpath.
-const SITE_URL = process.env.VITE_SITE_URL ?? "https://decimen.app/";
+const SITE_URL = process.env.VITE_SITE_URL ?? "https://cskwork.github.io/pwa-optical-transfer/";
 
 // HTTPS always: the receiver needs getUserMedia, and on insecure origins
 // that API does not exist at all — a phone reaching this server over the LAN
@@ -124,10 +124,10 @@ export default defineConfig(({ mode }) => {
         // We inject our own registration — see rootPwaHead().
         injectRegister: false,
         manifest: {
-          name: "Decimen Optical Transfer",
-          short_name: "Decimen",
+          name: "데시멘 광학 전송",
+          short_name: "데시멘",
           description:
-            "Send a file or text between two devices with a screen and a camera. No network.",
+            "화면과 카메라만으로 두 기기 사이에 파일이나 텍스트를 전송합니다. 네트워크 불필요.",
           theme_color: "#070a11",
           background_color: "#070a11",
           display: "standalone",

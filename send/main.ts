@@ -38,6 +38,7 @@ import {
 import { statusLine } from "../shared/status-line";
 import { requestScreenWakeLock } from "../shared/wake-lock";
 import { wireShareDialog } from "../shared/share-dialog";
+import { t, initI18n, bootI18n } from "../shared/i18n";
 
 const MARGIN = 4; // quiet-zone modules
 const LOOKAHEAD = 3;
@@ -118,9 +119,11 @@ function currentMode(): "file" | "snippet" {
 function updateFilePicker(): void {
   const armed = currentMode() === "file" && selectedFile !== null;
   paneFile.classList.toggle("has-file", armed);
-  filePickerButton.textContent = armed ? "Stop transfer" : "Select File";
+  filePickerButton.textContent = armed ? t("send.pickerBtnStop") : t("send.pickerBtn");
   filePickerLabel.textContent =
-    armed && selectedFile ? `Selected file: ${selectedFile.name}` : `Any file · up to ${MAX_FILE_LABEL}`;
+    armed && selectedFile
+      ? t("send.pickerSelected", { name: selectedFile.name })
+      : t("send.pickerAny", { max: MAX_FILE_LABEL });
 }
 
 /** Tear the stream down and disarm the picker. The input is cleared so the
@@ -134,7 +137,7 @@ function stopTransfer(): void {
   showStreamPanels(false);
   cfgFile.value = "";
   updateFilePicker();
-  setStatus("Choose a file to begin");
+  setStatus(t("send.statusChoose"));
 }
 
 /** Tap the code to fill the screen with it — a bigger physical code lets the
@@ -176,7 +179,7 @@ function applyMode(): void {
     paneFile.hidden = true;
     paneSnippet.hidden = true;
     paneDemo.hidden = false;
-    setStatus("Choose a demo payload to begin");
+    setStatus(t("send.statusChooseDemo"));
     return;
   }
 
@@ -185,8 +188,8 @@ function applyMode(): void {
   paneFile.hidden = mode !== "file";
   paneSnippet.hidden = mode !== "snippet";
   // The heading used to say "Send a file" even with Text snippet selected.
-  toolTitle.textContent = mode === "snippet" ? "Send text" : "Send a file";
-  setStatus(mode === "snippet" ? "Paste or type some text to begin" : "Choose a file to begin");
+  toolTitle.textContent = mode === "snippet" ? t("send.titleText") : t("send.titleFile");
+  setStatus(mode === "snippet" ? t("send.statusSnippet") : t("send.statusChoose"));
   updateFilePicker();
   // A file left in the picker survives the switch, so re-arm it rather than
   // leaving a filename on screen next to "choose a file to begin".
@@ -227,9 +230,9 @@ async function startSelection(
 
 /** Demo payloads ship in public/, so they sit at the site root beside /send/. */
 async function selectDemo(fileName: string): Promise<void> {
-  await startSelection(`loading ${fileName}…`, async () => {
+  await startSelection(t("send.statusLoading", { name: fileName }), async () => {
     const response = await fetch(`../${fileName}`);
-    if (!response.ok) throw new Error(`could not load ${fileName} (${response.status})`);
+    if (!response.ok) throw new Error(t("send.errLoadDemo", { name: fileName, status: String(response.status) }));
     const bytes = new Uint8Array(await response.arrayBuffer());
     return { name: fileName, size: bytes.length, packed: await packFile(fileName, "image/png", bytes) };
   });
@@ -238,16 +241,16 @@ async function selectDemo(fileName: string): Promise<void> {
 async function selectFile(): Promise<void> {
   const file = cfgFile.files?.[0];
   if (!file) return;
-  await startSelection(`preparing ${file.name}…`, async () => {
+  await startSelection(t("send.statusPreparing", { name: file.name }), async () => {
     // Checked here, off File.size, rather than after reading the bytes: a file
     // well past the limit should be refused instantly instead of after the
     // browser has spent time and memory materialising it. Name the actual size —
     // "too large" without a number leaves you guessing by how much.
     if (file.size === 0) {
-      throw new Error(`${file.name} is empty — there is nothing to send.`);
+      throw new Error(t("send.errEmpty", { name: file.name }));
     }
     if (file.size > MAX_FILE_BYTES) {
-      throw new Error(`${file.name} is ${formatBytes(file.size)}, over the ${MAX_FILE_LABEL} limit.`);
+      throw new Error(t("send.errTooLarge", { name: file.name, size: formatBytes(file.size), limit: MAX_FILE_LABEL }));
     }
     const bytes = new Uint8Array(await file.arrayBuffer());
     return { name: file.name, size: file.size, packed: await packFile(file.name, file.type, bytes) };
@@ -256,7 +259,7 @@ async function selectFile(): Promise<void> {
 }
 
 async function selectSnippet(): Promise<void> {
-  await startSelection("preparing text snippet…", async () => {
+  await startSelection(t("send.statusPreparingSnippet"), async () => {
     const packed = await packSnippet(snippetText.value);
     return { name: "Text snippet", size: packed.originalSize, packed };
   });
@@ -267,12 +270,12 @@ async function main() {
   // counts UTF-16 units and the real check counts UTF-8 bytes, which are never
   // fewer — so this is a loose guard and packSnippet() remains authoritative.
   snippetText.maxLength = MAX_SNIPPET_BYTES;
-  snippetLabel.textContent = `Text to send · up to ${MAX_SNIPPET_LABEL}`;
+  snippetLabel.textContent = t("send.snippetLabel", { max: MAX_SNIPPET_LABEL });
 
   document.querySelector('.mode-nav a[href="../send/"]')?.setAttribute("aria-current", "page");
   if (DEMO) {
     const current = document.querySelector('.mode-nav a[href="../send/"]');
-    if (current) current.textContent = "Demo";
+    if (current) current.textContent = "Demo"; // demo-build only; not localised
     for (const button of document.querySelectorAll<HTMLButtonElement>("[data-demo]")) {
       button.addEventListener("click", () => void selectDemo(button.dataset.demo!));
     }
@@ -291,6 +294,8 @@ async function main() {
     sendSnippetBtn.addEventListener("click", () => void selectSnippet());
     for (const input of modeInputs) input.addEventListener("change", applyMode);
   }
+  initI18n({ maxFile: MAX_FILE_LABEL, maxSnippet: MAX_SNIPPET_LABEL });
+  bootI18n();
   applyMode();
   window.addEventListener("resize", () => resizeDisplay?.());
   for (const el of [cfgFps, cfgBytes, cfgEcc, cfgSize]) {
@@ -315,7 +320,7 @@ async function startStream(revealStage = false) {
   showStreamPanels(false);
   if (!selectedFile) {
     setStatus(
-      currentMode() === "snippet" ? "Paste or type some text to begin" : "Choose a file to begin",
+      currentMode() === "snippet" ? t("send.statusSnippet") : t("send.statusChoose"),
     );
     return;
   }
@@ -336,11 +341,13 @@ async function startStream(revealStage = false) {
     const suggestion =
       smallestSufficientFrameSize(payload.length, offered) ?? minimumFrameBytes(payload.length);
     showError(
-      `${formatBytes(payload.length)} needs ` +
-        `${sourceBlockCount(payload.length, frameBytes).toLocaleString()} blocks at ` +
-        `${frameBytes} bytes per frame, and a frame can only number ` +
-        `${MAX_SOURCE_BLOCKS.toLocaleString()} of them. ` +
-        `Raise bytes / frame to ${suggestion} or more.`,
+      t("send.errNeedsBlocks", {
+        size: formatBytes(payload.length),
+        blocks: sourceBlockCount(payload.length, frameBytes).toLocaleString(),
+        frame: String(frameBytes),
+        maxBlocks: MAX_SOURCE_BLOCKS.toLocaleString(),
+        suggestion: String(suggestion),
+      }),
     );
     return;
   }
@@ -420,17 +427,17 @@ async function startStream(revealStage = false) {
       spec("spec-qr").textContent = `V${version} · ECC ${ecc}`;
       spec("spec-payload").textContent = `${name} · ${formatBytes(fileSize)}`;
       spec("spec-compression").textContent =
-        compression === "gzip" ? `gzip → ${formatBytes(transmittedSize)}` : "none";
+        compression === "gzip" ? `${t("send.specGzipLabel")} → ${formatBytes(transmittedSize)}` : t("send.specNone");
       spec("spec-k").textContent = `K = ${encoder.k}`;
       showStreamPanels(true);
       // The tail of the status line is the door to the share dialog. Built by
       // hand because setStatus is textContent-only — and the next setStatus
       // wiping the button out is exactly right.
-      setStatus(`Streaming ${name} — `);
+      setStatus(t("send.statusStreaming", { name }));
       const share = document.createElement("button");
       share.type = "button";
       share.className = "text-button";
-      share.textContent = "Share receiver link";
+      share.textContent = t("send.shareReceiverLink");
       share.addEventListener("click", openShareDialog);
       specs.append(share);
     }
